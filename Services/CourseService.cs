@@ -70,8 +70,7 @@ namespace StudentCourseAPI.Services
                 var course = student.Course.FirstOrDefault(c => c.Id == courseId);
                 if (course != null)
                 {
-                    student.Courses.Remove(course);
-                    
+                    student.Courses.Remove(course);     
                 }
                 
             }
