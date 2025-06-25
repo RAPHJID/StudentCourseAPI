@@ -27,13 +27,13 @@ public class CourseController : ControllerBase
     {
         var course = _courseService.GetCourseById(courseId);
         if(course == null) return NotFound();
-        return OK(course);
+        return Ok(course);
     }
 
     [HttpPost]
-    public IActionResult AddCourse(Course newCourse)
+    public IActionResult AddCourse(int studentId, Course newCourse)
     {
-        _courseService.AddCourse(newCourse);
+        _courseService.AddCourse(studentId, newCourse);
         return Ok(newCourse);
     }
 

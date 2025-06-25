@@ -1,3 +1,8 @@
+using Microsoft.AspNetCore.Mvc;
+using StudentCourseAPI.Models;
+using StudentCourseAPI.Services.IServices;
+
+
 namespace StudentCourseAPI.Controllers;
 
 [ApiController]

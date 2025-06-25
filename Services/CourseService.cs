@@ -26,24 +26,25 @@ namespace StudentCourseAPI.Services
 
         public Course GetCourseById(int courseId)
         {
-            foreach (var student in _studentService.GetStudentById())
+            var students = _studentService.GetAllStudents();
+            foreach (var student in students)
             {
                 var course = student.Courses.FirstOrDefault(c => c.Id == courseId);
                 if (course != null)
                 {
                     return course;
                 }
-                return null;
-                
+                                
             }
+            return null;
         }
 
         public void AddCourse(int studentId, Course newCourse)
         {
-            var student = _studentService.GetStudentById();
+            var student = _studentService.GetStudentById(studentId);
             if (student != null)
             {
-                student.Add(newCourse);
+                student.Courses.Add(newCourse);
             }
             
 
@@ -51,7 +52,9 @@ namespace StudentCourseAPI.Services
 
         public void UpdateCourse(int courseId, Course updatedCourse)
         {
-            foreach (var student in _studentService.GetAllStudents)
+            var students = _studentService.GetAllStudents();
+
+            foreach (var student in students)
             {
                 var course = student.Courses.FirstOrDefault(c => c.Id == courseId);
                 if (course != null)
@@ -65,9 +68,11 @@ namespace StudentCourseAPI.Services
 
         public void DeleteCourse(int courseId)
         {
-            foreach (var student in _studentService.GetStudentById())
+            var students = _studentService.GetAllStudents();
+
+            foreach (var student in students)
             {
-                var course = student.Course.FirstOrDefault(c => c.Id == courseId);
+                var course = student.Courses.FirstOrDefault(c => c.Id == courseId);
                 if (course != null)
                 {
                     student.Courses.Remove(course);     
