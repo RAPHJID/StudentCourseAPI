@@ -1,5 +1,8 @@
 using StudentCourseAPI.Services;
 using StudentCourseAPI.Services.IServices;
+using Microsoft.EntityFrameworkCore;
+using StudentCourseAPI.Data;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,9 +13,13 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddSingleton<IStudentService, StudentService>();
-builder.Services.AddSingleton<ICourseService, CourseService>();
+builder.Services.AddScoped<IStudentService, StudentService>();
+builder.Services.AddScoped<ICourseService, CourseService>();
 
+//EFCore
+builder.Services.AddDbContext<AppDbContext>(options =>{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
 
 var app = builder.Build();
 
