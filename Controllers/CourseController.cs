@@ -9,7 +9,7 @@ namespace StudentCourseAPI.Controllers;
 
 public class CourseController : ControllerBase
 {
-    public readonly ICourseService _courseService;
+    private readonly ICourseService _courseService;
 
     public CourseController(ICourseService courseService)
     {
@@ -17,42 +17,43 @@ public class CourseController : ControllerBase
     }
 
     [HttpGet]
-    public IActionResult GetAllCourses()
+    public async Task<IActionResult> GetAllCourses()
     {
-        return Ok(_courseService.GetAllCourses());
+        var courses = await _courseService.GetAllCoursesAsync();
+        return Ok(courses);
     }
 
     [HttpGet("{courseId}")]
-    public IActionResult GetCourseById(int courseId)
+    public async Task<IActionResult> GetCourseById(int courseId)
     {
-        var course = _courseService.GetCourseById(courseId);
-        if(course == null) return NotFound();
+        var course = await _courseService.GetCourseByIdAsync(courseId);
+        if(course == null) return NotFound("Course not found!");
         return Ok(course);
     }
 
     [HttpPost]
-    public IActionResult AddCourse(int studentId, Course newCourse)
+    public async Task<IActionResult> AddCourse(int studentId, Course newCourse)
     {
-        _courseService.AddCourse(studentId, newCourse);
+        await _courseService.AddCourseToStudentAsync(studentId, newCourse);
         return Ok(newCourse);
     }
 
     [HttpPut("{courseId}")]
-    public IActionResult UpdateCourse(int courseId, Course updatedCourse)
+    public async Task<IActionResult> UpdateCourse(int courseId, Course updatedCourse)
     {
-        var existing = _courseService.GetCourseById(courseId);
-        if(existing == null) return NotFound();
-        _courseService.UpdateCourse(courseId, updatedCourse);
+        var existing = await _courseService.GetCourseByIdAsync(courseId);
+        if(existing == null) return NotFound("Course not found!");
+        await _courseService.UpdateCourseAsync(courseId, updatedCourse);
         return Ok(updatedCourse);
     }
 
     [HttpDelete("{courseId}")]
-    public IActionResult DeleteCourse(int courseId)
+    public async Task<IActionResult> DeleteCourse(int courseId)
     {
-        var course = _courseService.GetCourseById(courseId);
-        if(course == null) return NotFound();
+        var course = await _courseService.GetCourseByIdAsync(courseId);
+        if(course == null) return NotFound("Course not found!");
 
-        _courseService.DeleteCourse(courseId);
+        await _courseService.DeleteCourse(courseId);
         return Ok($"Course with ID {courseId} Deleted!!");
     }
 
