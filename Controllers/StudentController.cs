@@ -10,54 +10,54 @@ namespace StudentCourseAPI.Controllers;
 
 public class StudentController : ControllerBase
 {
-    private readonly ILogger<StudentController> _logger;
     private readonly IStudentService _studentService;
+    
 
-    public StudentController(ILogger<StudentController> logger, IStudentService studentService)
+    public StudentController(IStudentService studentService)
     {
-        _logger = logger;
         _studentService = studentService;
     }
 
     [HttpGet]
-    public IActionResult GetAllStudents()
+    public async Task<IActionResult> GetAllStudents()
     {
-        return Ok(_studentService.GetAllStudents());
+        var students = await _studentService.GetAllStudentsAsync();
+        return Ok(students);
     } 
 
     [HttpGet("{studentId}")]
-    public IActionResult GetStudentById(int studentId)
+    public async Task<IActionResult> GetStudentById(int studentId)
     {
-        var student = _studentService.GetStudentById(studentId);
-        if (student == null) return NotFound();
+        var student = await _studentService.GetStudentByIdAsync(studentId);
+        if (student == null) return NotFound("Student Not Found");
         return Ok(student);
     }
 
     [HttpPost]
-    public IActionResult AddStudent(Student newStudent)
+    public async Task<IActionResult> AddStudent(Student newStudent)
     {
-        _studentService.AddStudent(newStudent);
+        await _studentService.AddStudentAsync(newStudent);
         return Ok(newStudent);
 
     }
 
     [HttpPut("{studentId}")]
-    public IActionResult UpdateStudent(int studentId, Student updatedStudent)
+    public async Task<IActionResult> UpdateStudent(int studentId, Student updatedStudent)
     {
-        var existing = _studentService.GetStudentById(studentId);
-        if(existing == null) return NotFound();
+        var existing = await _studentService.GetStudentByIdAsync(studentId);
+        if(existing == null) return NotFound("Student Not Found!");
 
-        _studentService.UpdateStudent(studentId,  updatedStudent);
+        await _studentService.UpdateStudentAsync(studentId,  updatedStudent);
         return Ok(updatedStudent);
 
     }
 
     [HttpDelete("{studentId}")]
-    public IActionResult DeleteStudent(int studentId)
+    public async Task<IActionResult> DeleteStudent(int studentId)
     {
-        var student = _studentService.GetStudentById(studentId);
-        if(student == null) return NotFound();
-        _studentService.DeleteStudent(studentId);
+        var student = await _studentService.GetStudentByIdAsync(studentId);
+        if(student == null) return NotFound("Student not Found!");
+        await _studentService.DeleteStudentAsync(studentId);
         return Ok($"Student with ID {studentId} DELETED!!");
 
     }
