@@ -5,80 +5,57 @@ namespace StudentCourseAPI.Services
 {
     public class CourseService : ICourseService
     {
-        private readonly IStudentService _studentService;
+        private readonly AppDbContext _context;
 
-        public CourseService(IStudentService studentService)
+        public CourseService(AppDbContext context)
         {
-            _studentService = studentService;
+            _context = context;
         }
 
-        public List<Course> GetAllCourses()
+        public async Task<List<Course>> GetAllCoursesAsync()
         {
-            var allCourses = new List<Course>();
-            var students = _studentService.GetAllStudents();
+            return await _context.Courses.ToListAsync();
+        }
 
-            foreach (var student in students)
-            {
-                allCourses.AddRange(student.Courses);
+        public async Task<Course> GetCourseByIdAsync(int courseId)
+        {
+            return await _context.Courses.FindAsync(courseId);
+
+        }
+
+        public async Task AddCourseToStudentAsync(int studentId, Course newCourse)
+        {
+
+            var student = await _context.Students.Include
+            (s => s.Courses).FirstOrDefaultAsync(s => s.studentId == studentId);
+            if(studentId != null){
+                _context.Courses.Add(newCourse);
+                await _context.SaveChangesAnsync();
             }
-            return allCourses;
+           
         }
 
-        public Course GetCourseById(int courseId)
+        public async Task UpdateCourseAsync(int courseId, Course updatedCourse)
         {
-            var students = _studentService.GetAllStudents();
-            foreach (var student in students)
-            {
-                var course = student.Courses.FirstOrDefault(c => c.Id == courseId);
-                if (course != null)
+            var existing = await _context.Courses.FindAsync(courseId);
+
+            if (existing != null)
                 {
-                    return course;
+                    existing.Title = updatedCourse.Title;
+                    existing.Description = updatedCourse.Description;
+                    await _context.SaveChangesAnsync();
                 }
-                                
-            }
-            return null;
         }
 
-        public void AddCourse(int studentId, Course newCourse)
+        public async Task DeleteCourse(int courseId)
         {
-            var student = _studentService.GetStudentById(studentId);
-            if (student != null)
+            var course = await _context.Courses.FindAsync();
+            if(course != null)
             {
-                student.Courses.Add(newCourse);
+                _context.Courses.Remove(course);
+                await _context.SaveChangesAnsync();
             }
-            
 
-        }
-
-        public void UpdateCourse(int courseId, Course updatedCourse)
-        {
-            var students = _studentService.GetAllStudents();
-
-            foreach (var student in students)
-            {
-                var course = student.Courses.FirstOrDefault(c => c.Id == courseId);
-                if (course != null)
-                {
-                    course.Title = updatedCourse.Title;
-                    course.Description = updatedCourse.Description;
-                }
-                
-            }
-        }
-
-        public void DeleteCourse(int courseId)
-        {
-            var students = _studentService.GetAllStudents();
-
-            foreach (var student in students)
-            {
-                var course = student.Courses.FirstOrDefault(c => c.Id == courseId);
-                if (course != null)
-                {
-                    student.Courses.Remove(course);     
-                }
-                
-            }
         }
         
     }
