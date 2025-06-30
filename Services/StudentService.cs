@@ -1,82 +1,44 @@
 using StudentCourseAPI.Models;
 using StudentCourseAPI.Services.IServices;
+using Microsoft.EntityFrameworkCore;
 
 namespace StudentCourseAPI.Services
 {
-
-    
     public class StudentService : IStudentService
     {
-        //Fake Data
-        private static List<Student> _students = new List<Student>
+        private readonly AppDbContext _context;
+       
+        public StudentService(AppDbContext context) => _context = context;
+
+        public async Task<List<Student>GetAllStudentsAsync() => return await _context.Students.Include(s => s.Courses).AsNoTracking().ToListAsync();
+        
+        public async Task<Student?> GetStudentByIdAsync(int studentId) => return await _context.Students.Include(s => s.Courses).FirstOrDefaultAsync(s => s.Id == studentId);
+        
+
+        public async Task AddStudentAsync(Student newStudent)
         {
-            new Student
-                {
-                    Id = 1,
-                    FullName = "Alice Mwangi",
-                    Email = "alice@example.com",
-                    Courses = new List<Course>
-                    {
-                        new Course { Id = 1, Title = "Math 101", Description = "Intro to Mathematics" },
-                        new Course { Id = 2, Title = "Physics 101", Description = "Basics of Physics" }
-                    }
-                },
-            new Student
-                {
-                    Id = 2,
-                    FullName = "Brian Otieno",
-                    Email = "brian@example.com",
-                    Courses = new List<Course>
-                    {
-                        new Course { Id = 3, Title = "Chemistry 101", Description = "Intro to Chemistry" }
-                    }
-                },
-            new Student
-                {
-                    Id = 3,
-                    FullName = "Cynthia Njeri",
-                    Email = "cynthia@example.com",
-                    Courses = new List<Course>() // No courses yet
-                }
-        };
-
-
-
-        public List<Student> GetAllStudents()
-        {
-            return _students;
+            await _context.Students.AddAsync(newStudent);
+            await _context.SaveChangesAsync();
         }
 
-        public Student GetStudentById(int studentId)
+        public async Task UpdateStudentAsync(int studentId, Student updatedStudent)
         {
-            var student = _students.FirstOrDefault(s => s.Id == studentId);
-            return(student);
+           var existing = await GetStudentByIdAsync(studentId);
+           ?? throw new KeyNotFoundException("Student not found");
+
+           _context.Entry(existing).CurrentValues.SetValues(updatedStudent);
+           await _context.SaveChangesAsync();
         }
 
-        public void AddStudent(Student student)
+        public async Task DeleteStudent(int studentId)
         {
-            _students.Add(student);
-        }
+           var student = await GetStudentById(studentId);
+           ?? throw new KeyNotFoundException("Student not found");
 
-        public void UpdateStudent(int studentId, Student updatedStudent)
-        {
-            var existingStudent = _students.FirstOrDefault(e => e.Id == studentId);
-            if(existingStudent != null)
-            {
-                existingStudent.FullName = updatedStudent.FullName;
-                existingStudent.Email = updatedStudent.Email;
-                existingStudent.Courses = updatedStudent.Courses;
-            }
-        }
+           _context.Students.Remove(student);
+           await _context.SaveChangesAsync();
 
-        public void DeleteStudent(int studentId)
-        {
-            var student = _students.FirstOrDefault(s => s.Id == studentId);
-            if(student!= null)
-            {
-                 _students.Remove(student);
-            }
-           
+
         }
 
     }
